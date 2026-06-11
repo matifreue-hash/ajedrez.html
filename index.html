@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Libros de Ajedrez PDF</title>
+
+<style>
+  body {
+    font-family: Arial;
+    background: #111;
+    color: white;
+    text-align: center;
+    padding: 20px;
+  }
+
+  button {
+    padding: 12px 18px;
+    margin: 10px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background: #4caf50;
+    color: white;
+    font-size: 16px;
+  }
+
+  .box {
+    background: #1e1e1e;
+    padding: 15px;
+    margin: 15px auto;
+    width: 80%;
+    border-radius: 10px;
+    text-align: left;
+  }
+
+  h2 { color: #ffcc00; }
+</style>
+</head>
+
+<body>
+
+<h1>Generador de Libros de Ajedrez</h1>
+
+<button onclick="generar()">Comenzar</button>
+
+<div id="contenedor"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+const libros = [
+  {
+    nombre: "Mi Sistema - Nimzowitsch",
+    tipo: "Estrategia",
+    explicacion: "Enseña control del centro, profilaxis y piezas activas.",
+    tip: "No memorices jugadas, entiende la idea detrás de cada movimiento.",
+    importante: "La profilaxis: evitar planes del rival antes de que existan."
+  },
+  {
+    nombre: "Chess Tactics for Champions - Susan Polgar",
+    tipo: "Táctica",
+    explicacion: "Entrena patrones tácticos como clavadas, dobles ataques y sacrificios.",
+    tip: "Visualiza las posiciones sin mover piezas físicas.",
+    importante: "Reconocer patrones tácticos rápidamente."
+  },
+  {
+    nombre: "The Art of Attack in Chess - Vuković",
+    tipo: "Táctica",
+    explicacion: "Enseña cómo atacar al rey con coordinación de piezas.",
+    tip: "Busca siempre debilidades alrededor del rey enemigo.",
+    importante: "El ataque al rey expuesto."
+  },
+  {
+    nombre: "Reassess Your Chess - Jeremy Silman",
+    tipo: "Estrategia",
+    explicacion: "Enseña a pensar como un maestro y crear planes.",
+    tip: "Evalúa la posición antes de mover cualquier pieza.",
+    importante: "Desequilibrios posicionales."
+  }
+];
+
+let seleccionados = [];
+
+function generar() {
+  seleccionados = [];
+
+  while (seleccionados.length < 2) {
+    let r = libros[Math.floor(Math.random() * libros.length)];
+    if (!seleccionados.includes(r)) {
+      seleccionados.push(r);
+    }
+  }
+
+  mostrar();
+}
+
+function mostrar() {
+  const contenedor = document.getElementById("contenedor");
+  contenedor.innerHTML = "";
+
+  seleccionados.forEach((libro, i) => {
+    const div = document.createElement("div");
+    div.className = "box";
+
+    div.innerHTML = `
+      <h2>${libro.nombre}</h2>
+      <p><b>Tipo:</b> ${libro.tipo}</p>
+      <p><b>Explicación:</b> ${libro.explicacion}</p>
+      <p><b>Tip:</b> ${libro.tip}</p>
+      <p><b>Parte más importante:</b> ${libro.importante}</p>
+      <button onclick="descargarPDF(${i})">Descargar PDF</button>
+    `;
+
+    contenedor.appendChild(div);
+  });
+}
+
+function descargarPDF(i) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  let l = seleccionados[i];
+
+  doc.setFontSize(14);
+  doc.text("Libro de Ajedrez", 10, 10);
+
+  doc.setFontSize(11);
+  doc.text("Nombre: " + l.nombre, 10, 20);
+  doc.text("Tipo: " + l.tipo, 10, 30);
+  doc.text("Explicación: " + l.explicacion, 10, 40, { maxWidth: 180 });
+  doc.text("Tip: " + l.tip, 10, 70, { maxWidth: 180 });
+  doc.text("Parte importante: " + l.importante, 10, 100, { maxWidth: 180 });
+
+  doc.save(l.nombre + ".pdf");
+}
+</script>
+
+</body>
+</html>
