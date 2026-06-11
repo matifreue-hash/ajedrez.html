@@ -2,171 +2,238 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Libros de Ajedrez PDF</title>
+<title>Generador de Libros de Ajedrez</title>
 
 <style>
-  body {
-    font-family: Arial;
-    background: #111;
-    color: white;
-    text-align: center;
-    padding: 20px;
-  }
+body{
+    background:#111;
+    color:white;
+    font-family:Arial;
+    text-align:center;
+    padding:20px;
+}
 
-  button {
-    padding: 12px 18px;
-    margin: 10px;
-    border: none;
-    border-radius: 8px;
-    background: #4caf50;
-    color: white;
-    cursor: pointer;
-    font-size: 16px;
-  }
+button{
+    background:#4CAF50;
+    color:white;
+    border:none;
+    padding:12px 20px;
+    border-radius:8px;
+    cursor:pointer;
+    margin:10px;
+}
 
-  .box {
-    background: #1e1e1e;
-    padding: 20px;
-    margin: 15px auto;
-    width: 85%;
-    border-radius: 10px;
-    text-align: left;
-  }
+.libro{
+    background:#222;
+    margin:20px auto;
+    padding:20px;
+    border-radius:10px;
+    width:85%;
+    text-align:left;
+}
 
-  h2 { color: #ffcc00; }
-  h3 { color: #4caf50; }
-
-  pre {
-    white-space: pre-wrap;
-    font-family: Arial;
-    color: #ddd;
-  }
+h2{
+    color:gold;
+}
 </style>
 </head>
-
 <body>
 
-<h1>Generador de Libros de Ajedrez (PDF Completo)</h1>
+<h1>Biblioteca de Ajedrez</h1>
 
-<button onclick="generar()">Comenzar</button>
+<button onclick="generarLibros()">Comenzar</button>
 
-<div id="contenedor"></div>
+<div id="resultado"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 
-const libros = [
-  {
-    nombre: "Dominio Estratégico en Ajedrez",
-    tipo: "Estrategia",
-    contenido: `
-INTRODUCCIÓN:
-La estrategia en ajedrez es el arte de planificar a largo plazo.
-
-CAPÍTULO 1: CONTROL DEL CENTRO
-El centro del tablero es la zona más importante. Dominar e4, d4, e5 y d5 te da ventaja de movilidad.
-
-CAPÍTULO 2: PIEZAS ACTIVAS
-Una pieza activa vale más que una pieza pasiva. Siempre busca mejorar la posición de tus piezas.
-
-CAPÍTULO 3: ESTRUCTURA DE PEONES
-Los peones determinan la forma de la partida. Una mala estructura puede condenarte.
-
-CAPÍTULO 4: PLANES
-No juegues sin objetivo. Cada movimiento debe tener un propósito estratégico.
-
-EJEMPLO:
-Si controlas el centro, puedes atacar en ambos flancos con facilidad.
-
-TIP DE ESTUDIO:
-Analiza partidas lentas y pregúntate “¿por qué hizo esta jugada?”
-
-RESUMEN:
-La estrategia es paciencia, control y planificación.
-`
-  },
-
-  {
-    nombre: "Tácticas Profesionales de Ajedrez",
-    tipo: "Táctica",
-    contenido: `
-INTRODUCCIÓN:
-La táctica es la herramienta que decide partidas rápidamente.
-
-CAPÍTULO 1: CLAVADAS
-Una pieza queda inmóvil porque moverla pierde material.
-
-CAPÍTULO 2: DOBLE ATAQUE
-Una sola pieza ataca dos objetivos al mismo tiempo.
-
-CAPÍTULO 3: SACRIFICIOS
-A veces se entrega material para obtener jaque mate o ventaja decisiva.
-
-CAPÍTULO 4: JAQUES FORZADOS
-Movimientos que obligan al rival a responder de una sola forma.
-
-EJEMPLO:
-Un caballo en f7 puede destruir la defensa del rey si está mal protegido.
-
-TIP DE ESTUDIO:
-Resuelve puzzles diariamente sin mover piezas reales.
-
-RESUMEN:
-La táctica es cálculo, visión y reconocimiento de patrones.
-`
-  }
+const nombres = [
+"Dominio Total del Medio Juego",
+"Secretos de los Grandes Maestros",
+"La Ciencia de la Estrategia",
+"Patrones Tácticos Ganadores",
+"El Arte del Ataque",
+"Camino hacia la Maestría",
+"Pensamiento Estratégico Avanzado",
+"Manual de Combinaciones"
 ];
 
-let seleccionados = [];
+const frases = [
+"Una buena posición vale más que una combinación brillante.",
+"Los peones son el alma del ajedrez.",
+"Cada jugada debe tener una idea.",
+"La táctica nace de una posición superior.",
+"Quien controla el centro controla la partida.",
+"La paciencia convierte pequeñas ventajas en victorias.",
+"El cálculo preciso supera la intuición.",
+"La coordinación de piezas es poder."
+];
 
-function generar() {
-  seleccionados = [];
+const capitulos = [
+`CAPÍTULO 1: CONTROL DEL CENTRO
 
-  while (seleccionados.length < 2) {
-    let r = libros[Math.floor(Math.random() * libros.length)];
-    if (!seleccionados.includes(r)) {
-      seleccionados.push(r);
-    }
-  }
+El centro es la región más importante del tablero.
+Las piezas colocadas en el centro tienen acceso a más casillas.
+El dominio central permite cambiar rápidamente de flanco y crear amenazas constantes.`,
 
-  mostrar();
+`CAPÍTULO 2: ACTIVIDAD DE PIEZAS
+
+Una pieza activa tiene más valor que una pieza pasiva.
+Siempre debes buscar mejorar tus piezas antes de iniciar operaciones tácticas.`,
+
+`CAPÍTULO 3: PLANIFICACIÓN
+
+Todo movimiento debe responder a un plan.
+Los jugadores fuertes no juegan jugadas aisladas; construyen ideas a largo plazo.`,
+
+`CAPÍTULO 4: TÁCTICAS
+
+Las tácticas aparecen cuando las piezas están bien ubicadas.
+Las clavadas, ataques dobles y sacrificios son herramientas fundamentales.`,
+
+`CAPÍTULO 5: ATAQUE AL REY
+
+Un ataque exitoso requiere coordinación.
+Las piezas deben trabajar juntas para explotar debilidades.`,
+
+`CAPÍTULO 6: FINALES
+
+Los finales enseñan precisión.
+Comprender la actividad del rey y la estructura de peones es esencial.`
+];
+
+const consejos = [
+"Analiza partidas clásicas comentadas.",
+"Resuelve ejercicios tácticos todos los días.",
+"Juega partidas lentas para pensar más.",
+"Revisa tus errores después de cada partida.",
+"Estudia finales básicos antes de aperturas complejas.",
+"Busca siempre mejorar tu peor pieza."
+];
+
+let librosGenerados = [];
+
+function crearLibro() {
+
+const nombre =
+nombres[Math.floor(Math.random()*nombres.length)];
+
+const frase =
+frases[Math.floor(Math.random()*frases.length)];
+
+const tipo =
+Math.random()>0.5 ? "Táctica" : "Estrategia";
+
+let contenido = "";
+
+for(let i=0;i<4;i++){
+contenido += capitulos[
+Math.floor(Math.random()*capitulos.length)
+] + "\n\n";
 }
 
-function mostrar() {
-  const contenedor = document.getElementById("contenedor");
-  contenedor.innerHTML = "";
+contenido +=
+"\nCONSEJO PRINCIPAL:\n" +
+consejos[Math.floor(Math.random()*consejos.length)] +
+"\n\n";
 
-  seleccionados.forEach((libro, i) => {
-    const div = document.createElement("div");
-    div.className = "box";
+contenido +=
+"FRASE IMPORTANTE:\n" +
+frase +
+"\n\n";
 
-    div.innerHTML = `
-      <h2>${libro.nombre}</h2>
-      <h3>Tipo: ${libro.tipo}</h3>
-      <pre>${libro.contenido}</pre>
-      <button onclick="descargarPDF(${i})">Descargar PDF</button>
-    `;
+contenido +=
+"RESUMEN:\n" +
+"El progreso en ajedrez se logra mediante estudio constante, análisis y práctica deliberada. Un jugador fuerte combina estrategia, táctica y comprensión de finales para tomar mejores decisiones durante toda la partida.";
 
-    contenedor.appendChild(div);
-  });
+return {
+nombre,
+tipo,
+frase,
+contenido
+};
 }
 
-function descargarPDF(i) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+function generarLibros(){
 
-  let libro = seleccionados[i];
+librosGenerados=[];
 
-  doc.setFontSize(14);
-  doc.text(libro.nombre, 10, 10);
+while(librosGenerados.length<2){
 
-  doc.setFontSize(11);
+let libro = crearLibro();
 
-  let lines = doc.splitTextToSize(libro.contenido, 180);
-  doc.text(lines, 10, 20);
+if(!librosGenerados.some(l=>l.nombre===libro.nombre)){
+librosGenerados.push(libro);
+}
 
-  doc.save(libro.nombre + ".pdf");
+}
+
+mostrar();
+}
+
+function mostrar(){
+
+const contenedor =
+document.getElementById("resultado");
+
+contenedor.innerHTML="";
+
+librosGenerados.forEach((libro,index)=>{
+
+contenedor.innerHTML += `
+<div class="libro">
+<h2>${libro.nombre}</h2>
+
+<p><b>Tipo:</b> ${libro.tipo}</p>
+
+<p><b>Frase importante:</b><br>
+"${libro.frase}"
+</p>
+
+<pre style="white-space:pre-wrap;color:white;">
+${libro.contenido}
+</pre>
+
+<button onclick="pdf(${index})">
+Descargar PDF
+</button>
+</div>
+`;
+
+});
+
+}
+
+function pdf(index){
+
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF();
+
+const libro = librosGenerados[index];
+
+doc.setFontSize(18);
+doc.text(libro.nombre,10,15);
+
+doc.setFontSize(12);
+
+const texto =
+doc.splitTextToSize(
+"Tipo: " + libro.tipo +
+"\n\nFrase importante: " +
+libro.frase +
+"\n\n" +
+libro.contenido,
+180
+);
+
+doc.text(texto,10,30);
+
+doc.save(
+libro.nombre.replace(/\s+/g,"_") + ".pdf"
+);
+
 }
 
 </script>
