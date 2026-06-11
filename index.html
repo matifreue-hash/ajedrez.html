@@ -16,30 +16,37 @@
   button {
     padding: 12px 18px;
     margin: 10px;
-    cursor: pointer;
     border: none;
     border-radius: 8px;
     background: #4caf50;
     color: white;
+    cursor: pointer;
     font-size: 16px;
   }
 
   .box {
     background: #1e1e1e;
-    padding: 15px;
+    padding: 20px;
     margin: 15px auto;
-    width: 80%;
+    width: 85%;
     border-radius: 10px;
     text-align: left;
   }
 
   h2 { color: #ffcc00; }
+  h3 { color: #4caf50; }
+
+  pre {
+    white-space: pre-wrap;
+    font-family: Arial;
+    color: #ddd;
+  }
 </style>
 </head>
 
 <body>
 
-<h1>Generador de Libros de Ajedrez</h1>
+<h1>Generador de Libros de Ajedrez (PDF Completo)</h1>
 
 <button onclick="generar()">Comenzar</button>
 
@@ -48,34 +55,66 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
+
 const libros = [
   {
-    nombre: "Mi Sistema - Nimzowitsch",
+    nombre: "Dominio Estratégico en Ajedrez",
     tipo: "Estrategia",
-    explicacion: "Enseña control del centro, profilaxis y piezas activas.",
-    tip: "No memorices jugadas, entiende la idea detrás de cada movimiento.",
-    importante: "La profilaxis: evitar planes del rival antes de que existan."
+    contenido: `
+INTRODUCCIÓN:
+La estrategia en ajedrez es el arte de planificar a largo plazo.
+
+CAPÍTULO 1: CONTROL DEL CENTRO
+El centro del tablero es la zona más importante. Dominar e4, d4, e5 y d5 te da ventaja de movilidad.
+
+CAPÍTULO 2: PIEZAS ACTIVAS
+Una pieza activa vale más que una pieza pasiva. Siempre busca mejorar la posición de tus piezas.
+
+CAPÍTULO 3: ESTRUCTURA DE PEONES
+Los peones determinan la forma de la partida. Una mala estructura puede condenarte.
+
+CAPÍTULO 4: PLANES
+No juegues sin objetivo. Cada movimiento debe tener un propósito estratégico.
+
+EJEMPLO:
+Si controlas el centro, puedes atacar en ambos flancos con facilidad.
+
+TIP DE ESTUDIO:
+Analiza partidas lentas y pregúntate “¿por qué hizo esta jugada?”
+
+RESUMEN:
+La estrategia es paciencia, control y planificación.
+`
   },
+
   {
-    nombre: "Chess Tactics for Champions - Susan Polgar",
+    nombre: "Tácticas Profesionales de Ajedrez",
     tipo: "Táctica",
-    explicacion: "Entrena patrones tácticos como clavadas, dobles ataques y sacrificios.",
-    tip: "Visualiza las posiciones sin mover piezas físicas.",
-    importante: "Reconocer patrones tácticos rápidamente."
-  },
-  {
-    nombre: "The Art of Attack in Chess - Vuković",
-    tipo: "Táctica",
-    explicacion: "Enseña cómo atacar al rey con coordinación de piezas.",
-    tip: "Busca siempre debilidades alrededor del rey enemigo.",
-    importante: "El ataque al rey expuesto."
-  },
-  {
-    nombre: "Reassess Your Chess - Jeremy Silman",
-    tipo: "Estrategia",
-    explicacion: "Enseña a pensar como un maestro y crear planes.",
-    tip: "Evalúa la posición antes de mover cualquier pieza.",
-    importante: "Desequilibrios posicionales."
+    contenido: `
+INTRODUCCIÓN:
+La táctica es la herramienta que decide partidas rápidamente.
+
+CAPÍTULO 1: CLAVADAS
+Una pieza queda inmóvil porque moverla pierde material.
+
+CAPÍTULO 2: DOBLE ATAQUE
+Una sola pieza ataca dos objetivos al mismo tiempo.
+
+CAPÍTULO 3: SACRIFICIOS
+A veces se entrega material para obtener jaque mate o ventaja decisiva.
+
+CAPÍTULO 4: JAQUES FORZADOS
+Movimientos que obligan al rival a responder de una sola forma.
+
+EJEMPLO:
+Un caballo en f7 puede destruir la defensa del rey si está mal protegido.
+
+TIP DE ESTUDIO:
+Resuelve puzzles diariamente sin mover piezas reales.
+
+RESUMEN:
+La táctica es cálculo, visión y reconocimiento de patrones.
+`
   }
 ];
 
@@ -104,10 +143,8 @@ function mostrar() {
 
     div.innerHTML = `
       <h2>${libro.nombre}</h2>
-      <p><b>Tipo:</b> ${libro.tipo}</p>
-      <p><b>Explicación:</b> ${libro.explicacion}</p>
-      <p><b>Tip:</b> ${libro.tip}</p>
-      <p><b>Parte más importante:</b> ${libro.importante}</p>
+      <h3>Tipo: ${libro.tipo}</h3>
+      <pre>${libro.contenido}</pre>
       <button onclick="descargarPDF(${i})">Descargar PDF</button>
     `;
 
@@ -119,20 +156,19 @@ function descargarPDF(i) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
-  let l = seleccionados[i];
+  let libro = seleccionados[i];
 
   doc.setFontSize(14);
-  doc.text("Libro de Ajedrez", 10, 10);
+  doc.text(libro.nombre, 10, 10);
 
   doc.setFontSize(11);
-  doc.text("Nombre: " + l.nombre, 10, 20);
-  doc.text("Tipo: " + l.tipo, 10, 30);
-  doc.text("Explicación: " + l.explicacion, 10, 40, { maxWidth: 180 });
-  doc.text("Tip: " + l.tip, 10, 70, { maxWidth: 180 });
-  doc.text("Parte importante: " + l.importante, 10, 100, { maxWidth: 180 });
 
-  doc.save(l.nombre + ".pdf");
+  let lines = doc.splitTextToSize(libro.contenido, 180);
+  doc.text(lines, 10, 20);
+
+  doc.save(libro.nombre + ".pdf");
 }
+
 </script>
 
 </body>
