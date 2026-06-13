@@ -3,252 +3,318 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ta-Te-Ti vs IA</title>
+<title>Centro de Juegos</title>
 
 <style>
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
+    font-family:Arial,sans-serif;
 }
 
 body{
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-    background:linear-gradient(135deg,#0f172a,#1e293b);
-    font-family:Arial, sans-serif;
+    background:#0f172a;
     color:white;
+    text-align:center;
+}
+
+#menuBtn{
+    position:fixed;
+    top:15px;
+    left:15px;
+    width:50px;
+    height:50px;
+    font-size:28px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    background:#2563eb;
+    color:white;
+    z-index:1000;
+}
+
+#menu{
+    position:fixed;
+    top:0;
+    left:-250px;
+    width:250px;
+    height:100%;
+    background:#1e293b;
+    transition:.3s;
+    z-index:999;
+    padding-top:80px;
+}
+
+#menu.abierto{
+    left:0;
+}
+
+.opcion{
+    padding:20px;
+    font-size:22px;
+    cursor:pointer;
+    text-align:left;
+    padding-left:30px;
+}
+
+.opcion:hover{
+    background:#334155;
 }
 
 h1{
-    margin-bottom:20px;
+    margin-top:80px;
+}
+
+#tateti{
+    padding:20px;
 }
 
 #tablero{
     display:grid;
-    grid-template-columns:repeat(3,120px);
-    gap:8px;
+    grid-template-columns:repeat(3,100px);
+    gap:5px;
+    justify-content:center;
+    margin:20px auto;
 }
 
 .casilla{
-    width:120px;
-    height:120px;
+    width:100px;
+    height:100px;
     background:#334155;
-    border-radius:12px;
     display:flex;
     justify-content:center;
     align-items:center;
-    font-size:70px;
-    font-weight:bold;
+    font-size:60px;
     cursor:pointer;
-    transition:0.2s;
-}
-
-.casilla:hover{
-    background:#475569;
+    border-radius:10px;
 }
 
 #mensaje{
-    margin-top:20px;
+    margin-top:10px;
     font-size:22px;
 }
 
-button{
-    margin-top:15px;
-    padding:10px 25px;
+#ajedrez{
+    display:none;
+    padding-top:80px;
+}
+
+#tableroAjedrez{
+    width:480px;
+    height:480px;
+    margin:20px auto;
+    display:grid;
+    grid-template-columns:repeat(8,1fr);
+}
+
+.blanca{
+    background:#f0d9b5;
+}
+
+.negra{
+    background:#b58863;
+}
+
+.pieza{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:40px;
+}
+
+.volver{
+    padding:10px 20px;
     border:none;
     border-radius:8px;
-    cursor:pointer;
-    font-size:18px;
-    background:#3b82f6;
+    background:#ef4444;
     color:white;
-}
-
-button:hover{
-    background:#2563eb;
-}
-
-.x{
-    color:#38bdf8;
-}
-
-.o{
-    color:#f43f5e;
+    cursor:pointer;
 }
 </style>
 </head>
 <body>
 
-<h1>🎮 Ta-Te-Ti vs IA</h1>
+<button id="menuBtn">☰</button>
+
+<div id="menu">
+    <div class="opcion" onclick="mostrarTateti()">
+        🎮 Ta-Te-Ti
+    </div>
+
+    <div class="opcion" onclick="mostrarAjedrez()">
+        ♟️ Ajedrez
+    </div>
+</div>
+
+<div id="tateti">
+
+<h1>Ta-Te-Ti</h1>
 
 <div id="tablero"></div>
 
 <div id="mensaje">Tu turno (X)</div>
 
-<button onclick="reiniciar()">Reiniciar</button>
+</div>
+
+<div id="ajedrez">
+
+<h1>Ajedrez</h1>
+
+<button class="volver" onclick="mostrarTateti()">
+Volver al Ta-Te-Ti
+</button>
+
+<div id="tableroAjedrez"></div>
+
+</div>
 
 <script>
+const menu = document.getElementById("menu");
+
+document.getElementById("menuBtn").onclick = () => {
+    menu.classList.toggle("abierto");
+};
+
+function mostrarAjedrez(){
+    document.getElementById("tateti").style.display="none";
+    document.getElementById("ajedrez").style.display="block";
+    menu.classList.remove("abierto");
+}
+
+function mostrarTateti(){
+    document.getElementById("ajedrez").style.display="none";
+    document.getElementById("tateti").style.display="block";
+    menu.classList.remove("abierto");
+}
+
+/* =========================
+   TA-TE-TI
+========================= */
+
 const tableroDiv = document.getElementById("tablero");
 const mensaje = document.getElementById("mensaje");
 
 let tablero = ["","","","","","","","",""];
-let juegoActivo = true;
-
-const jugador = "X";
-const ia = "O";
+let activo = true;
 
 const combinaciones = [
-    [0,1,2],[3,4,5],[6,7,8],
-    [0,3,6],[1,4,7],[2,5,8],
-    [0,4,8],[2,4,6]
+[0,1,2],[3,4,5],[6,7,8],
+[0,3,6],[1,4,7],[2,5,8],
+[0,4,8],[2,4,6]
 ];
 
 function crearTablero(){
-    tableroDiv.innerHTML = "";
 
-    tablero.forEach((valor,index)=>{
-        const celda = document.createElement("div");
-        celda.classList.add("casilla");
-        celda.textContent = valor;
-        if(valor==="X") celda.classList.add("x");
-        if(valor==="O") celda.classList.add("o");
+    tableroDiv.innerHTML="";
 
-        celda.addEventListener("click",()=>jugadaJugador(index));
-        tableroDiv.appendChild(celda);
+    tablero.forEach((valor,i)=>{
+
+        const c=document.createElement("div");
+        c.className="casilla";
+        c.textContent=valor;
+
+        c.onclick=()=>jugar(i);
+
+        tableroDiv.appendChild(c);
     });
 }
 
-function jugadaJugador(index){
-    if(!juegoActivo || tablero[index] !== "") return;
+function jugar(i){
 
-    tablero[index] = jugador;
+    if(tablero[i]!=="" || !activo) return;
+
+    tablero[i]="X";
+
     crearTablero();
 
-    if(verificarGanador(tablero,jugador)){
-        mensaje.textContent = "🏆 ¡Ganaste!";
-        juegoActivo = false;
+    if(ganador("X")){
+        mensaje.textContent="¡Ganaste!";
+        activo=false;
         return;
     }
 
     if(tableroCompleto()){
-        mensaje.textContent = "🤝 Empate";
-        juegoActivo = false;
+        mensaje.textContent="Empate";
         return;
     }
 
-    mensaje.textContent = "🤖 Pensando...";
-
-    setTimeout(()=>{
-        movimientoIA();
-    },400);
+    setTimeout(turnoIA,300);
 }
 
-function movimientoIA(){
-    let mejorMovimiento = minimax(tablero, ia).index;
+function turnoIA(){
 
-    tablero[mejorMovimiento] = ia;
+    let libres=[];
+
+    tablero.forEach((v,i)=>{
+        if(v==="") libres.push(i);
+    });
+
+    let mov=libres[Math.floor(Math.random()*libres.length)];
+
+    tablero[mov]="O";
 
     crearTablero();
 
-    if(verificarGanador(tablero, ia)){
-        mensaje.textContent = "💀 La IA ganó";
-        juegoActivo = false;
+    if(ganador("O")){
+        mensaje.textContent="La IA ganó";
+        activo=false;
         return;
     }
 
     if(tableroCompleto()){
-        mensaje.textContent = "🤝 Empate";
-        juegoActivo = false;
-        return;
+        mensaje.textContent="Empate";
     }
-
-    mensaje.textContent = "Tu turno (X)";
 }
 
-function minimax(nuevoTablero, jugadorActual){
+function ganador(j){
 
-    const espacios = nuevoTablero
-        .map((v,i)=>v===""?i:null)
-        .filter(v=>v!==null);
-
-    if(verificarGanador(nuevoTablero, jugador))
-        return {score:-10};
-
-    if(verificarGanador(nuevoTablero, ia))
-        return {score:10};
-
-    if(espacios.length===0)
-        return {score:0};
-
-    const movimientos = [];
-
-    for(let i=0;i<espacios.length;i++){
-
-        let movimiento = {};
-        movimiento.index = espacios[i];
-
-        nuevoTablero[espacios[i]] = jugadorActual;
-
-        if(jugadorActual === ia){
-            movimiento.score = minimax(nuevoTablero, jugador).score;
-        }else{
-            movimiento.score = minimax(nuevoTablero, ia).score;
-        }
-
-        nuevoTablero[espacios[i]] = "";
-
-        movimientos.push(movimiento);
-    }
-
-    let mejorMovimiento;
-
-    if(jugadorActual === ia){
-
-        let mejorScore = -Infinity;
-
-        for(let i=0;i<movimientos.length;i++){
-            if(movimientos[i].score > mejorScore){
-                mejorScore = movimientos[i].score;
-                mejorMovimiento = i;
-            }
-        }
-
-    }else{
-
-        let mejorScore = Infinity;
-
-        for(let i=0;i<movimientos.length;i++){
-            if(movimientos[i].score < mejorScore){
-                mejorScore = movimientos[i].score;
-                mejorMovimiento = i;
-            }
-        }
-    }
-
-    return movimientos[mejorMovimiento];
-}
-
-function verificarGanador(tableroActual, jugadorActual){
-    return combinaciones.some(comb =>
-        comb.every(i => tableroActual[i] === jugadorActual)
+    return combinaciones.some(c=>
+        c.every(i=>tablero[i]===j)
     );
 }
 
 function tableroCompleto(){
-    return tablero.every(c => c !== "");
-}
-
-function reiniciar(){
-    tablero = ["","","","","","","","",""];
-    juegoActivo = true;
-    mensaje.textContent = "Tu turno (X)";
-    crearTablero();
+    return tablero.every(v=>v!=="");
 }
 
 crearTablero();
+
+/* =========================
+   AJEDREZ
+========================= */
+
+const tableroAjedrez =
+document.getElementById("tableroAjedrez");
+
+const piezas = [
+"♜","♞","♝","♛","♚","♝","♞","♜",
+"♟","♟","♟","♟","♟","♟","♟","♟",
+"","","","","","","","",
+"","","","","","","","",
+"","","","","","","","",
+"","","","","","","","",
+"♙","♙","♙","♙","♙","♙","♙","♙",
+"♖","♘","♗","♕","♔","♗","♘","♖"
+];
+
+for(let fila=0;fila<8;fila++){
+
+    for(let col=0;col<8;col++){
+
+        const casilla=document.createElement("div");
+
+        casilla.className=
+        (fila+col)%2===0
+        ?"blanca pieza"
+        :"negra pieza";
+
+        casilla.textContent=
+        piezas[fila*8+col];
+
+        tableroAjedrez.appendChild(casilla);
+    }
+}
 </script>
 
 </body>
