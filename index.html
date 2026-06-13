@@ -2,240 +2,253 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Generador de Libros de Ajedrez</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ta-Te-Ti vs IA</title>
 
 <style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
 body{
-    background:#111;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    background:linear-gradient(135deg,#0f172a,#1e293b);
+    font-family:Arial, sans-serif;
     color:white;
-    font-family:Arial;
-    text-align:center;
-    padding:20px;
+}
+
+h1{
+    margin-bottom:20px;
+}
+
+#tablero{
+    display:grid;
+    grid-template-columns:repeat(3,120px);
+    gap:8px;
+}
+
+.casilla{
+    width:120px;
+    height:120px;
+    background:#334155;
+    border-radius:12px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:70px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.casilla:hover{
+    background:#475569;
+}
+
+#mensaje{
+    margin-top:20px;
+    font-size:22px;
 }
 
 button{
-    background:#4CAF50;
-    color:white;
+    margin-top:15px;
+    padding:10px 25px;
     border:none;
-    padding:12px 20px;
     border-radius:8px;
     cursor:pointer;
-    margin:10px;
+    font-size:18px;
+    background:#3b82f6;
+    color:white;
 }
 
-.libro{
-    background:#222;
-    margin:20px auto;
-    padding:20px;
-    border-radius:10px;
-    width:85%;
-    text-align:left;
+button:hover{
+    background:#2563eb;
 }
 
-h2{
-    color:gold;
+.x{
+    color:#38bdf8;
+}
+
+.o{
+    color:#f43f5e;
 }
 </style>
 </head>
 <body>
 
-<h1>Biblioteca de Ajedrez</h1>
+<h1>🎮 Ta-Te-Ti vs IA</h1>
 
-<button onclick="generarLibros()">Comenzar</button>
+<div id="tablero"></div>
 
-<div id="resultado"></div>
+<div id="mensaje">Tu turno (X)</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<button onclick="reiniciar()">Reiniciar</button>
 
 <script>
+const tableroDiv = document.getElementById("tablero");
+const mensaje = document.getElementById("mensaje");
 
-const nombres = [
-"Dominio Total del Medio Juego",
-"Secretos de los Grandes Maestros",
-"La Ciencia de la Estrategia",
-"Patrones Tácticos Ganadores",
-"El Arte del Ataque",
-"Camino hacia la Maestría",
-"Pensamiento Estratégico Avanzado",
-"Manual de Combinaciones"
+let tablero = ["","","","","","","","",""];
+let juegoActivo = true;
+
+const jugador = "X";
+const ia = "O";
+
+const combinaciones = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
 ];
 
-const frases = [
-"Una buena posición vale más que una combinación brillante.",
-"Los peones son el alma del ajedrez.",
-"Cada jugada debe tener una idea.",
-"La táctica nace de una posición superior.",
-"Quien controla el centro controla la partida.",
-"La paciencia convierte pequeñas ventajas en victorias.",
-"El cálculo preciso supera la intuición.",
-"La coordinación de piezas es poder."
-];
+function crearTablero(){
+    tableroDiv.innerHTML = "";
 
-const capitulos = [
-`CAPÍTULO 1: CONTROL DEL CENTRO
+    tablero.forEach((valor,index)=>{
+        const celda = document.createElement("div");
+        celda.classList.add("casilla");
+        celda.textContent = valor;
+        if(valor==="X") celda.classList.add("x");
+        if(valor==="O") celda.classList.add("o");
 
-El centro es la región más importante del tablero.
-Las piezas colocadas en el centro tienen acceso a más casillas.
-El dominio central permite cambiar rápidamente de flanco y crear amenazas constantes.`,
-
-`CAPÍTULO 2: ACTIVIDAD DE PIEZAS
-
-Una pieza activa tiene más valor que una pieza pasiva.
-Siempre debes buscar mejorar tus piezas antes de iniciar operaciones tácticas.`,
-
-`CAPÍTULO 3: PLANIFICACIÓN
-
-Todo movimiento debe responder a un plan.
-Los jugadores fuertes no juegan jugadas aisladas; construyen ideas a largo plazo.`,
-
-`CAPÍTULO 4: TÁCTICAS
-
-Las tácticas aparecen cuando las piezas están bien ubicadas.
-Las clavadas, ataques dobles y sacrificios son herramientas fundamentales.`,
-
-`CAPÍTULO 5: ATAQUE AL REY
-
-Un ataque exitoso requiere coordinación.
-Las piezas deben trabajar juntas para explotar debilidades.`,
-
-`CAPÍTULO 6: FINALES
-
-Los finales enseñan precisión.
-Comprender la actividad del rey y la estructura de peones es esencial.`
-];
-
-const consejos = [
-"Analiza partidas clásicas comentadas.",
-"Resuelve ejercicios tácticos todos los días.",
-"Juega partidas lentas para pensar más.",
-"Revisa tus errores después de cada partida.",
-"Estudia finales básicos antes de aperturas complejas.",
-"Busca siempre mejorar tu peor pieza."
-];
-
-let librosGenerados = [];
-
-function crearLibro() {
-
-const nombre =
-nombres[Math.floor(Math.random()*nombres.length)];
-
-const frase =
-frases[Math.floor(Math.random()*frases.length)];
-
-const tipo =
-Math.random()>0.5 ? "Táctica" : "Estrategia";
-
-let contenido = "";
-
-for(let i=0;i<4;i++){
-contenido += capitulos[
-Math.floor(Math.random()*capitulos.length)
-] + "\n\n";
+        celda.addEventListener("click",()=>jugadaJugador(index));
+        tableroDiv.appendChild(celda);
+    });
 }
 
-contenido +=
-"\nCONSEJO PRINCIPAL:\n" +
-consejos[Math.floor(Math.random()*consejos.length)] +
-"\n\n";
+function jugadaJugador(index){
+    if(!juegoActivo || tablero[index] !== "") return;
 
-contenido +=
-"FRASE IMPORTANTE:\n" +
-frase +
-"\n\n";
+    tablero[index] = jugador;
+    crearTablero();
 
-contenido +=
-"RESUMEN:\n" +
-"El progreso en ajedrez se logra mediante estudio constante, análisis y práctica deliberada. Un jugador fuerte combina estrategia, táctica y comprensión de finales para tomar mejores decisiones durante toda la partida.";
+    if(verificarGanador(tablero,jugador)){
+        mensaje.textContent = "🏆 ¡Ganaste!";
+        juegoActivo = false;
+        return;
+    }
 
-return {
-nombre,
-tipo,
-frase,
-contenido
-};
+    if(tableroCompleto()){
+        mensaje.textContent = "🤝 Empate";
+        juegoActivo = false;
+        return;
+    }
+
+    mensaje.textContent = "🤖 Pensando...";
+
+    setTimeout(()=>{
+        movimientoIA();
+    },400);
 }
 
-function generarLibros(){
+function movimientoIA(){
+    let mejorMovimiento = minimax(tablero, ia).index;
 
-librosGenerados=[];
+    tablero[mejorMovimiento] = ia;
 
-while(librosGenerados.length<2){
+    crearTablero();
 
-let libro = crearLibro();
+    if(verificarGanador(tablero, ia)){
+        mensaje.textContent = "💀 La IA ganó";
+        juegoActivo = false;
+        return;
+    }
 
-if(!librosGenerados.some(l=>l.nombre===libro.nombre)){
-librosGenerados.push(libro);
+    if(tableroCompleto()){
+        mensaje.textContent = "🤝 Empate";
+        juegoActivo = false;
+        return;
+    }
+
+    mensaje.textContent = "Tu turno (X)";
 }
 
+function minimax(nuevoTablero, jugadorActual){
+
+    const espacios = nuevoTablero
+        .map((v,i)=>v===""?i:null)
+        .filter(v=>v!==null);
+
+    if(verificarGanador(nuevoTablero, jugador))
+        return {score:-10};
+
+    if(verificarGanador(nuevoTablero, ia))
+        return {score:10};
+
+    if(espacios.length===0)
+        return {score:0};
+
+    const movimientos = [];
+
+    for(let i=0;i<espacios.length;i++){
+
+        let movimiento = {};
+        movimiento.index = espacios[i];
+
+        nuevoTablero[espacios[i]] = jugadorActual;
+
+        if(jugadorActual === ia){
+            movimiento.score = minimax(nuevoTablero, jugador).score;
+        }else{
+            movimiento.score = minimax(nuevoTablero, ia).score;
+        }
+
+        nuevoTablero[espacios[i]] = "";
+
+        movimientos.push(movimiento);
+    }
+
+    let mejorMovimiento;
+
+    if(jugadorActual === ia){
+
+        let mejorScore = -Infinity;
+
+        for(let i=0;i<movimientos.length;i++){
+            if(movimientos[i].score > mejorScore){
+                mejorScore = movimientos[i].score;
+                mejorMovimiento = i;
+            }
+        }
+
+    }else{
+
+        let mejorScore = Infinity;
+
+        for(let i=0;i<movimientos.length;i++){
+            if(movimientos[i].score < mejorScore){
+                mejorScore = movimientos[i].score;
+                mejorMovimiento = i;
+            }
+        }
+    }
+
+    return movimientos[mejorMovimiento];
 }
 
-mostrar();
+function verificarGanador(tableroActual, jugadorActual){
+    return combinaciones.some(comb =>
+        comb.every(i => tableroActual[i] === jugadorActual)
+    );
 }
 
-function mostrar(){
-
-const contenedor =
-document.getElementById("resultado");
-
-contenedor.innerHTML="";
-
-librosGenerados.forEach((libro,index)=>{
-
-contenedor.innerHTML += `
-<div class="libro">
-<h2>${libro.nombre}</h2>
-
-<p><b>Tipo:</b> ${libro.tipo}</p>
-
-<p><b>Frase importante:</b><br>
-"${libro.frase}"
-</p>
-
-<pre style="white-space:pre-wrap;color:white;">
-${libro.contenido}
-</pre>
-
-<button onclick="pdf(${index})">
-Descargar PDF
-</button>
-</div>
-`;
-
-});
-
+function tableroCompleto(){
+    return tablero.every(c => c !== "");
 }
 
-function pdf(index){
-
-const { jsPDF } = window.jspdf;
-const doc = new jsPDF();
-
-const libro = librosGenerados[index];
-
-doc.setFontSize(18);
-doc.text(libro.nombre,10,15);
-
-doc.setFontSize(12);
-
-const texto =
-doc.splitTextToSize(
-"Tipo: " + libro.tipo +
-"\n\nFrase importante: " +
-libro.frase +
-"\n\n" +
-libro.contenido,
-180
-);
-
-doc.text(texto,10,30);
-
-doc.save(
-libro.nombre.replace(/\s+/g,"_") + ".pdf"
-);
-
+function reiniciar(){
+    tablero = ["","","","","","","","",""];
+    juegoActivo = true;
+    mensaje.textContent = "Tu turno (X)";
+    crearTablero();
 }
 
+crearTablero();
 </script>
 
 </body>
